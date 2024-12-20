@@ -9,6 +9,6 @@ int xfprintf(FILE *stream, const char *format, ...);
 void *xmalloc(size_t size);
 void *xcalloc(size_t nmem, size_t size);
 void *xrealloc(void *ptr, size_t size);
-FILE *xfopen(char *filename, char *mode);
+FILE *xfopen(const char *filename, char *mode);
 
 #endif

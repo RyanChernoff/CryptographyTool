@@ -3,7 +3,7 @@
 
 #include "read_file.h"
 
-void shift_cypher_encrypt(char *input_file, char *output_file, char *key_file);
-void shift_cypher_decrypt(char *input_file, char *output_file, char *key_file);
+void shift_cypher_encrypt(const char *input_file, const char *output_file, const char *key_file);
+void shift_cypher_decrypt(const char *input_file, const char *output_file, const char *key_file);
 
 #endif

@@ -18,12 +18,12 @@ bool is_alphabet(char *map)
         if (map[i] >= 'a' && map[i] <= 'z')
         {
             map[i] -= 'a';
-            if (tracker[map[i]])
+            if (tracker[(int)map[i]])
             {
                 free(tracker);
                 return false;
             }
-            tracker[map[i]] = true;
+            tracker[(int)map[i]] = true;
         }
         else
         {
@@ -45,7 +45,7 @@ long get_index(char *str, char c, size_t len)
     return -1;
 }
 
-void caesar_cypher_encrypt(char *input_file, char *output_file, char *key_file)
+void caesar_cypher_encrypt(const char *input_file, const char *output_file, const char *key_file)
 {
     char *input = read_file(input_file);
     char *map = xcalloc(28, sizeof(char));
@@ -72,20 +72,20 @@ void caesar_cypher_encrypt(char *input_file, char *output_file, char *key_file)
         }
     }
 
-    FILE *key = xfopen(key_file, "w");
+    FILE *key = xfopen(key_file, "w+");
     for (int i = 0; i < 26; i++)
         map[i] += 'a';
     xfprintf(key, "%s", map);
     free(map);
     fclose(key);
 
-    FILE *output = xfopen(output_file, "w");
+    FILE *output = xfopen(output_file, "w+");
     xfprintf(output, "%s", input);
     fclose(output);
     free(input);
 }
 
-void caesar_cypher_decrypt(char *input_file, char *output_file, char *key_file)
+void caesar_cypher_decrypt(const char *input_file, const char *output_file, const char *key_file)
 {
     char *map = read_file(key_file);
     if (strlen(map) != 26 || !is_alphabet(map))
@@ -113,7 +113,7 @@ void caesar_cypher_decrypt(char *input_file, char *output_file, char *key_file)
 
     free(map);
 
-    FILE *output = xfopen(output_file, "w");
+    FILE *output = xfopen(output_file, "w+");
     xfprintf(output, "%s", cypher);
     free(cypher);
     fclose(output);

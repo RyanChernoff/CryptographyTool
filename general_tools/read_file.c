@@ -1,7 +1,7 @@
 #include <string.h>
 #include "safety.h"
 
-char *read_file(char *file_name)
+char *read_file(const char *file_name)
 {
     FILE *file = xfopen(file_name, "r");
 

@@ -1,109 +1,109 @@
+#include <unistd.h>
 #include "shift_cypher.h"
 #include "caesar_cypher.h"
 #include "base_change.h"
 
-typedef void encrypt_fn(char *input_file, char *output_file, char *key_file);
-typedef void decrypt_fn(char *input_file, char *output_file, char *key_file);
+const char *usage_msg = "Usage: ctool [options]\n\n-e tells the program you want to encrypt the input file\n-d tells the program you want to decrypt te input file\n-i the name of the input file to encrypt/decrypt. This file must always be specified.\n-o the name of the file to output the encrypted/decrypted file. If this option is not specified the output will overwrite the input file\n-k the name of the file to write the key to if encryption is occuring or read the key from if decrytion is occuring. If encrypting this option is optional and if decrypting this option is necessary for all non-standard base changes\n-h prints this message\n";
 
-unsigned int str_hash_fn(key k)
+// Start Encrypt
+
+void encrypt(const char *input_file, const char *output_file, const char *key_file)
 {
-    char *str = (char *)k;
-    unsigned long len = strlen(str);
-    unsigned int hash = 0;
-    for (unsigned long i = 0; i < len; i++)
-    {
-        hash = hash * 31 + ((unsigned int)str[i]);
-    }
-    return hash;
-}
-
-bool str_equiv_fn(key k1, key k2)
-{
-    char *str1 = (char *)k1;
-    char *str2 = (char *)k2;
-    return strcmp(str1, str2) == 0;
-}
-
-// Begin Encrypt
-
-dict_t make_dict_encrypt()
-{
-    dict_t D = dict_new(10, &str_hash_fn, &str_equiv_fn, NULL, NULL);
-    dict_add(D, (key) "1", &shift_cypher_encrypt);
-    dict_add(D, (key) "2", &caesar_cypher_encrypt);
-    dict_add(D, (key) "3", &binary_encrypt);
-    dict_add(D, (key) "4", &octal_encrypt);
-    dict_add(D, (key) "5", &hex_encrypt);
-    dict_add(D, (key) "6", &base32_encrypt);
-    dict_add(D, (key) "7", &base64_encrypt);
-    dict_add(D, (key) "8", &base_encrypt);
-    return D;
-}
-
-void encrypt(char *input_file, char *output_file, char *key_file)
-{
-    dict_t D = make_dict_encrypt();
     while (true)
     {
         char choice[4];
         printf("What encryption algorithm would you like to use:\n1 - Shift Cypher\n2 - Ceaser Cypher\n3 - To Binary\n4 - To Octal\n5 - To Hex\n6 - To Base32\n7 - To Base64\n8 - To Base\nQ - Quit\n");
         xfgets(choice, 4, stdin);
-        choice[strlen(choice) - 1] = '\0';
-
-        encrypt_fn *F = (encrypt_fn *)dict_get(D, (key)choice);
-        if (F != NULL)
+        switch (choice[0])
         {
-            (*F)(input_file, output_file, key_file);
-            break;
+        case '1':
+            shift_cypher_encrypt(input_file, output_file, key_file);
+            return;
+        case '2':
+            caesar_cypher_encrypt(input_file, output_file, key_file);
+            return;
+        case '3':
+            binary_encrypt(input_file, output_file, key_file);
+            return;
+        case '4':
+            octal_encrypt(input_file, output_file, key_file);
+            return;
+        case '5':
+            hex_encrypt(input_file, output_file, key_file);
+            return;
+        case '6':
+            base32_encrypt(input_file, output_file, key_file);
+            return;
+        case '7':
+            base64_encrypt(input_file, output_file, key_file);
+            return;
+        case '8':
+            base_encrypt(input_file, output_file, key_file);
+            return;
+        case 'Q':
+            return;
         }
-        if (strcmp(choice, "Q") == 0)
-            break;
-
         printf("Invalid choice\n");
     }
-    dict_free(D);
 }
 
 // End Encrypt
 
 // Begin Decrypt
 
-dict_t make_dict_decrypt()
+void decrypt(const char *input_file, const char *output_file, const char *key_file)
 {
-    dict_t D = dict_new(10, &str_hash_fn, &str_equiv_fn, NULL, NULL);
-    dict_add(D, (key) "1", &shift_cypher_decrypt);
-    dict_add(D, (key) "2", &caesar_cypher_decrypt);
-    dict_add(D, (key) "3", &binary_decrypt);
-    dict_add(D, (key) "4", &octal_decrypt);
-    dict_add(D, (key) "5", &hex_decrypt);
-    dict_add(D, (key) "6", &base32_decrypt);
-    dict_add(D, (key) "7", &base64_decrypt);
-    dict_add(D, (key) "8", &base_decrypt);
-    return D;
-}
-
-void decrypt(char *input_file, char *output_file, char *key_file)
-{
-    dict_t D = make_dict_decrypt();
     while (true)
     {
         char choice[4];
         printf("What decryption algorithm would you like to use:\n1 - Shift Cypher\n2 - Ceaser Cypher\n3 - From Binary\n4 - From Octal\n5 - From Hex\n6 - From Base32\n7 - From Base64\n8 - From Base\nQ - Quit\n");
         xfgets(choice, 4, stdin);
-        choice[strlen(choice) - 1] = '\0';
-
-        decrypt_fn *F = (decrypt_fn *)dict_get(D, (key)choice);
-        if (F != NULL)
+        switch (choice[0])
         {
-            (*F)(input_file, output_file, key_file);
-            break;
+        case '1':
+            if (key_file == NULL)
+            {
+                printf("Can't decrypt a shift cyper without a key\n");
+                break;
+            }
+            shift_cypher_decrypt(input_file, output_file, key_file);
+            return;
+        case '2':
+            if (key_file == NULL)
+            {
+                printf("Can't decrypt a caesar cyper without a key\n");
+                break;
+            }
+            caesar_cypher_decrypt(input_file, output_file, key_file);
+            return;
+        case '3':
+            binary_decrypt(input_file, output_file);
+            return;
+        case '4':
+            octal_decrypt(input_file, output_file);
+            return;
+        case '5':
+            hex_decrypt(input_file, output_file);
+            return;
+        case '6':
+            base32_decrypt(input_file, output_file);
+            return;
+        case '7':
+            base64_decrypt(input_file, output_file);
+            return;
+        case '8':
+            if (key_file == NULL)
+            {
+                printf("Can't decrypt from an arbitrary base without a key\n");
+                break;
+            }
+            base_decrypt(input_file, output_file, key_file);
+            return;
+        case 'Q':
+            return;
         }
-        if (strcmp(choice, "Q") == 0)
-            break;
-
         printf("Invalid choice\n");
     }
-    dict_free(D);
 }
 
 // End Decrypt
@@ -111,21 +111,57 @@ void decrypt(char *input_file, char *output_file, char *key_file)
 int main(int argc, char *argv[])
 {
     setbuf(stdin, NULL);
-    if (argc != 5)
+    bool encrypt_flag = true;
+    const char *input = NULL;
+    const char *output = NULL;
+    const char *key = NULL;
+    for (int opt = getopt(argc, argv, "hedi:o:k:"); opt != -1; opt = getopt(argc, argv, "hedi:o:k:"))
     {
-        printf("Usage: %s [-e/-d] <input_file> <output_file> <key_file>\n", argv[0]);
+        switch (opt)
+        {
+        case 'e':
+            encrypt_flag = true;
+            break;
+        case 'd':
+            encrypt_flag = false;
+            break;
+        case 'i':
+            input = optarg;
+            break;
+        case 'o':
+            output = optarg;
+            break;
+        case 'k':
+            key = optarg;
+            break;
+        default:
+            printf(usage_msg);
+            exit(1);
+        }
     }
-    else if (strcmp(argv[1], "-e") == 0)
+
+    if (input == NULL)
     {
-        encrypt(argv[2], argv[3], argv[4]);
+        printf(usage_msg);
+        exit(1);
     }
-    else if (strcmp(argv[1], "-d") == 0)
+
+    if (output == NULL)
     {
-        decrypt(argv[2], argv[3], argv[4]);
+        output = input;
+    }
+
+    if (encrypt_flag)
+    {
+        if (key == NULL)
+        {
+            key = "key.txt";
+        }
+        encrypt(input, output, key);
     }
     else
     {
-        printf("Usage: %s [-e/-d] <input_file> <output_file> <key_file>\n", argv[0]);
+        decrypt(input, output, key);
     }
     return 0;
 }

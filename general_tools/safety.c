@@ -23,7 +23,7 @@ int xfprintf(FILE *stream, const char *format, va_list args)
     return ret;
 }
 
-FILE *xfopen(char *filename, char *mode)
+FILE *xfopen(const char *filename, char *mode)
 {
     FILE *ret = fopen(filename, mode);
     if (ret == NULL)

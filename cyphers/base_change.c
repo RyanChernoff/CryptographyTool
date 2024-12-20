@@ -24,7 +24,7 @@ dict_t make_dict(char *str, bool rev, char padding)
         char *k = xmalloc(sizeof(char));
         char *e = xmalloc(sizeof(char));
         *k = i;
-        *e = str[i];
+        *e = str[(int)i];
         if (!rev)
             dict_add(map, (key)k, (entry)e);
         else
@@ -93,7 +93,7 @@ void set_bits(char *str, unsigned long index, char c, size_t size)
 
 // Start Encryptions
 
-void change_base_encrypt(char *input_file, char *output_file, char *key_file, size_t size, dict_t map, char padding)
+void change_base_encrypt(const char *input_file, const char *output_file, const char *key_file, size_t size, dict_t map, char padding)
 //@requires size > 0;
 {
     // Gets input to length divisible by size
@@ -132,25 +132,25 @@ void change_base_encrypt(char *input_file, char *output_file, char *key_file, si
     free(input);
     dict_free(map);
 
-    FILE *output = xfopen(output_file, "w");
+    FILE *output = xfopen(output_file, "w+");
     xfprintf(output, "%s", cyphertext);
     fclose(output);
     free(cyphertext);
 
-    FILE *key = xfopen(key_file, "w");
+    FILE *key = xfopen(key_file, "w+");
     xfprintf(key, "%lu", size);
     fclose(key);
 }
 
 // Start Encryptions
 
-void binary_encrypt(char *input_file, char *output_file, char *key_file)
+void binary_encrypt(const char *input_file, const char *output_file, const char *key_file)
 {
     dict_t map = make_dict("01", false, '=');
     change_base_encrypt(input_file, output_file, key_file, 1, map, '=');
 }
 
-void octal_encrypt(char *input_file, char *output_file, char *key_file)
+void octal_encrypt(const char *input_file, const char *output_file, const char *key_file)
 {
     dict_t map = make_dict("01234567", false, '=');
 
@@ -180,35 +180,35 @@ void octal_encrypt(char *input_file, char *output_file, char *key_file)
     free(input);
     dict_free(map);
 
-    FILE *output = xfopen(output_file, "w");
+    FILE *output = xfopen(output_file, "w+");
     xfprintf(output, "%s", oct);
     fclose(output);
     free(oct);
 
-    FILE *key = xfopen(key_file, "w");
+    FILE *key = xfopen(key_file, "w+");
     xfprintf(key, "%d", 8);
     fclose(key);
 }
 
-void hex_encrypt(char *input_file, char *output_file, char *key_file)
+void hex_encrypt(const char *input_file, const char *output_file, const char *key_file)
 {
     dict_t map = make_dict("0123456789ABCDEF", false, '=');
     change_base_encrypt(input_file, output_file, key_file, 4, map, '=');
 }
 
-void base32_encrypt(char *input_file, char *output_file, char *key_file)
+void base32_encrypt(const char *input_file, const char *output_file, const char *key_file)
 {
     dict_t map = make_dict("ABCDEFGHIJKLMNOPQRSTUVWXYZ234567", false, '=');
     change_base_encrypt(input_file, output_file, key_file, 5, map, '=');
 }
 
-void base64_encrypt(char *input_file, char *output_file, char *key_file)
+void base64_encrypt(const char *input_file, const char *output_file, const char *key_file)
 {
     dict_t map = make_dict("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/", false, '=');
     change_base_encrypt(input_file, output_file, key_file, 6, map, '=');
 }
 
-void base_encrypt(char *input_file, char *output_file, char *key_file)
+void base_encrypt(const char *input_file, const char *output_file, const char *key_file)
 {
     char base = 0;
     char buf[259];
@@ -279,7 +279,7 @@ void base_encrypt(char *input_file, char *output_file, char *key_file)
 
 // Start Decryptions
 
-void change_base_decrypt(char *input_file, char *output_file, size_t size, dict_t map)
+void change_base_decrypt(const char *input_file, const char *output_file, size_t size, dict_t map)
 //@requires size > 0;
 {
     char *input = read_file(input_file);
@@ -313,19 +313,19 @@ void change_base_decrypt(char *input_file, char *output_file, size_t size, dict_
     free(input);
     dict_free(map);
 
-    FILE *output = xfopen(output_file, "w");
+    FILE *output = xfopen(output_file, "w+");
     xfprintf(output, "%s", message);
     fclose(output);
     free(message);
 }
 
-void binary_decrypt(char *input_file, char *output_file, char *key_file)
+void binary_decrypt(const char *input_file, const char *output_file)
 {
     dict_t map = make_dict("01", true, '=');
     change_base_decrypt(input_file, output_file, 1, map);
 }
 
-void octal_decrypt(char *input_file, char *output_file, char *key_file)
+void octal_decrypt(const char *input_file, const char *output_file)
 {
     char *input = read_file(input_file);
     unsigned long len = strlen(input);
@@ -383,31 +383,31 @@ void octal_decrypt(char *input_file, char *output_file, char *key_file)
     free(input);
     dict_free(map);
 
-    FILE *output = xfopen(output_file, "w");
+    FILE *output = xfopen(output_file, "w+");
     xfprintf(output, "%s", message);
     fclose(output);
     free(message);
 }
 
-void hex_decrypt(char *input_file, char *output_file, char *key_file)
+void hex_decrypt(const char *input_file, const char *output_file)
 {
     dict_t map = make_dict("0123456789ABCDEF", true, '=');
     change_base_decrypt(input_file, output_file, 4, map);
 }
 
-void base32_decrypt(char *input_file, char *output_file, char *key_file)
+void base32_decrypt(const char *input_file, const char *output_file)
 {
     dict_t map = make_dict("ABCDEFGHIJKLMNOPQRSTUVWXYZ234567", true, '=');
     change_base_decrypt(input_file, output_file, 5, map);
 }
 
-void base64_decrypt(char *input_file, char *output_file, char *key_file)
+void base64_decrypt(const char *input_file, const char *output_file)
 {
     dict_t map = make_dict("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/", true, '=');
     change_base_decrypt(input_file, output_file, 6, map);
 }
 
-void base_decrypt(char *input_file, char *output_file, char *key_file)
+void base_decrypt(const char *input_file, const char *output_file, const char *key_file)
 {
     char *key = read_file(key_file);
     if (key[0] < '1' || key[0] > '8')

@@ -1,6 +1,6 @@
 #include "read_file.h"
 
-void shift_cypher_encrypt(char *input_file, char *output_file, char *key_file)
+void shift_cypher_encrypt(const char *input_file, const char *output_file, const char *key_file)
 {
     char *input = read_file(input_file);
     char choice[5];
@@ -35,17 +35,17 @@ void shift_cypher_encrypt(char *input_file, char *output_file, char *key_file)
         input[i] = c;
     }
 
-    FILE *output = xfopen(output_file, "w");
+    FILE *output = xfopen(output_file, "w+");
     xfprintf(output, "%s", input);
     free(input);
     fclose(output);
 
-    FILE *key = xfopen(key_file, "w");
+    FILE *key = xfopen(key_file, "w+");
     xfprintf(key, "%d", shift);
     fclose(key);
 }
 
-void shift_cypher_decrypt(char *input_file, char *output_file, char *key_file)
+void shift_cypher_decrypt(const char *input_file, const char *output_file, const char *key_file)
 {
     char *input = read_file(input_file);
     char *key = read_file(key_file);
@@ -74,7 +74,7 @@ void shift_cypher_decrypt(char *input_file, char *output_file, char *key_file)
         input[i] = c;
     }
 
-    FILE *output = xfopen(output_file, "w");
+    FILE *output = xfopen(output_file, "w+");
     xfprintf(output, "%s", input);
     free(input);
     fclose(output);

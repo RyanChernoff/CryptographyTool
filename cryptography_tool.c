@@ -2,8 +2,30 @@
 #include "shift_cypher.h"
 #include "caesar_cypher.h"
 #include "base_change.h"
+#include "rsa.h"
 
-const char *usage_msg = "Usage: ctool [options]\n\n-e tells the program you want to encrypt the input file\n-d tells the program you want to decrypt te input file\n-i the name of the input file to encrypt/decrypt. This file must always be specified.\n-o the name of the file to output the encrypted/decrypted file. If this option is not specified the output will overwrite the input file\n-k the name of the file to write the key to if encryption is occuring or read the key from if decrytion is occuring. If encrypting this option is optional and if decrypting this option is necessary for all non-standard base changes\n-h prints this message\n";
+const char *usage_msg = "Usage: ctool [options]\n\n-e tells the program you want to encrypt the input file\n-d tells the program you want to decrypt te input file\n-c tells the program that you want to create an encryption key. This causes the key file specified by -k to be the output file of the key and the output file specified by -o to be the public key if needed. If neither are specified than key.txt and public-key.txt will be created\n-i the name of the input file to encrypt/decrypt. This file must always be specified.\n-o the name of the file to output the encrypted/decrypted file. If this option is not specified the output will overwrite the input file\n-k the name of the file to write the key to if encryption is occuring or read the key from if decrytion is occuring. If encrypting this option is optional and if decrypting this option is necessary for all non-standard base changes\n-h prints this message\n";
+
+// Start Create
+
+void create_key(const char *output, const char *key)
+{
+    while (true)
+    {
+        char choice[4];
+        printf("What algorithm would you like to use to generate your key:\n1 - rsa\nQ - Quit\n");
+        xfgets(choice, 4, stdin);
+        switch (choice[0])
+        {
+        case '1':
+            rsa_create_key(output, key);
+            return;
+        case 'Q':
+            return;
+        }
+        printf("Invalid choice\n");
+    }
+}
 
 // Start Encrypt
 
@@ -112,10 +134,11 @@ int main(int argc, char *argv[])
 {
     setbuf(stdin, NULL);
     bool encrypt_flag = true;
+    bool create_flag = true;
     const char *input = NULL;
     const char *output = NULL;
     const char *key = NULL;
-    for (int opt = getopt(argc, argv, "hedi:o:k:"); opt != -1; opt = getopt(argc, argv, "hedi:o:k:"))
+    for (int opt = getopt(argc, argv, "hedci:o:k:"); opt != -1; opt = getopt(argc, argv, "hedi:o:k:"))
     {
         switch (opt)
         {
@@ -124,6 +147,9 @@ int main(int argc, char *argv[])
             break;
         case 'd':
             encrypt_flag = false;
+            break;
+        case 'c':
+            create_flag = true;
             break;
         case 'i':
             input = optarg;
@@ -140,6 +166,21 @@ int main(int argc, char *argv[])
         }
     }
 
+    if (key == NULL)
+    {
+        key = "key.txt";
+    }
+
+    if (create_flag)
+    {
+        if (output == NULL)
+        {
+            output = "public-key.txt";
+        }
+        create_key(output, key);
+        return 0;
+    }
+
     if (input == NULL)
     {
         printf(usage_msg);
@@ -153,10 +194,6 @@ int main(int argc, char *argv[])
 
     if (encrypt_flag)
     {
-        if (key == NULL)
-        {
-            key = "key.txt";
-        }
         encrypt(input, output, key);
     }
     else

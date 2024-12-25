@@ -3,17 +3,17 @@
 
 // Start Base Change Dictionaries
 
-unsigned int char_hash_fn(key k)
+static unsigned int char_hash_fn(key k)
 {
     return (unsigned int)*((char *)k);
 }
 
-bool char_equiv_fn(key k1, key k2)
+static bool char_equiv_fn(key k1, key k2)
 {
     return *((char *)k1) == *((char *)k2);
 }
 
-dict_t make_dict(char *str, bool rev, char padding)
+static dict_t make_dict(char *str, bool rev, char padding)
 //@requires 2 <= strlen(str) && strlen(str) <= 256;
 {
     unsigned int len = strlen(str);
@@ -46,13 +46,13 @@ dict_t make_dict(char *str, bool rev, char padding)
 
 // Start Bit Reading Functions
 
-bool get_bit(char *str, unsigned long index)
+static bool get_bit(char *str, unsigned long index)
 //@requires strlen(str) >= index/8;
 {
     return (str[index / 8] & (1 << (7 - (index % 8)))) != 0;
 }
 
-char get_bits(char *str, unsigned long index, size_t size)
+static char get_bits(char *str, unsigned long index, size_t size)
 //@requires size > 0;
 //@requires strlen(str) >= (index*size + size - 1)/8;
 {
@@ -66,7 +66,7 @@ char get_bits(char *str, unsigned long index, size_t size)
     return c;
 }
 
-void set_bit(char *str, unsigned long index, bool bit)
+static void set_bit(char *str, unsigned long index, bool bit)
 //@requires strlen(str) >= index/8;
 {
     unsigned long mod = index % 8;
@@ -77,7 +77,7 @@ void set_bit(char *str, unsigned long index, bool bit)
         str[index] = str[index] & (0xFF - (1 << (7 - mod)));
 }
 
-void set_bits(char *str, unsigned long index, char c, size_t size)
+static void set_bits(char *str, unsigned long index, char c, size_t size)
 //@requires 0 < size && size <= 8;
 //@requires strlen(str) >= (index*size + size - 1)/8;
 {
@@ -93,7 +93,7 @@ void set_bits(char *str, unsigned long index, char c, size_t size)
 
 // Start Encryptions
 
-void change_base_encrypt(const char *input_file, const char *output_file, const char *key_file, size_t size, dict_t map, char padding)
+static void change_base_encrypt(const char *input_file, const char *output_file, const char *key_file, size_t size, dict_t map, char padding)
 //@requires size > 0;
 {
     // Gets input to length divisible by size
@@ -279,7 +279,7 @@ void base_encrypt(const char *input_file, const char *output_file, const char *k
 
 // Start Decryptions
 
-void change_base_decrypt(const char *input_file, const char *output_file, size_t size, dict_t map)
+static void change_base_decrypt(const char *input_file, const char *output_file, size_t size, dict_t map)
 //@requires size > 0;
 {
     char *input = read_file(input_file);

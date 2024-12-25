@@ -1,7 +1,7 @@
 #include <stdbool.h>
 #include "read_file.h"
 
-bool is_alphabet(char *map)
+static bool is_alphabet(char *map)
 //@requires strlen(map) == 27 || strlen(map) == 26;
 //@ensures strlen(map) == 26;
 {
@@ -35,7 +35,7 @@ bool is_alphabet(char *map)
     return true;
 }
 
-long get_index(char *str, char c, size_t len)
+static long get_index(char *str, char c, size_t len)
 {
     for (size_t i = 0; i < len; i++)
     {

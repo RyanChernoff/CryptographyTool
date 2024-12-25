@@ -34,7 +34,7 @@ void encrypt(const char *input_file, const char *output_file, const char *key_fi
     while (true)
     {
         char choice[4];
-        printf("What encryption algorithm would you like to use:\n1 - Shift Cypher\n2 - Ceaser Cypher\n3 - To Binary\n4 - To Octal\n5 - To Hex\n6 - To Base32\n7 - To Base64\n8 - To Base\nQ - Quit\n");
+        printf("What encryption algorithm would you like to use:\n1 - Shift Cypher\n2 - Ceaser Cypher\n3 - To Binary\n4 - To Octal\n5 - To Hex\n6 - To Base32\n7 - To Base64\n8 - To Base\n9 - RSA\nQ - Quit\n");
         xfgets(choice, 4, stdin);
         switch (choice[0])
         {
@@ -61,6 +61,9 @@ void encrypt(const char *input_file, const char *output_file, const char *key_fi
             return;
         case '8':
             base_encrypt(input_file, output_file, key_file);
+            return;
+        case '9':
+            rsa_encrypt(input_file, output_file, key_file);
             return;
         case 'Q':
             return;
@@ -134,7 +137,7 @@ int main(int argc, char *argv[])
 {
     setbuf(stdin, NULL);
     bool encrypt_flag = true;
-    bool create_flag = true;
+    bool create_flag = false;
     const char *input = NULL;
     const char *output = NULL;
     const char *key = NULL;

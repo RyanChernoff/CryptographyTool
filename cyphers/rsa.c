@@ -198,7 +198,7 @@ void rsa_create_key(const char *public_key_file, const char *private_key_file)
 
 void rsa_encrypt(const char *input_file, const char *output_file, const char *key_file)
 {
-    char *key = read_file(key_file);
+    char *key = read_file(key_file, NULL);
     errno = 0;
     char *end_ptr;
     long long e = strtoll(key, &end_ptr, 0);
@@ -220,8 +220,8 @@ void rsa_encrypt(const char *input_file, const char *output_file, const char *ke
     free(key);
 
     // Calculate padding size
-    char *input = read_file(input_file);
-    size_t len = strlen(input);
+    size_t len;
+    char *input = read_file(input_file, &len);
     size_t block_size = get_block_size(n);
     size_t padding_size = 3;
     // since the encrypted text will add 1 bit per block there must be some multiple of 8 blocks
@@ -251,7 +251,7 @@ void rsa_encrypt(const char *input_file, const char *output_file, const char *ke
         }
         num = mod_power(num, e, n);
         for (size_t i = 0; i <= block_size; i++)
-            set_bit(cypher, block * block_size + i, num & (1LL << (block_size - i)));
+            set_bit(cypher, block * (block_size + 1) + i, num & (1LL << (block_size - i)));
     }
     free(plain_text);
 
@@ -259,4 +259,70 @@ void rsa_encrypt(const char *input_file, const char *output_file, const char *ke
     fwrite(cypher, sizeof(char), padding_size + len + (num_blocks / 8), output);
     fclose(output);
     free(cypher);
+}
+
+void rsa_decrypt(const char *input_file, const char *output_file, const char *key_file)
+{
+    char *key = read_file(key_file, NULL);
+    errno = 0;
+    char *end_ptr;
+    long long d = strtoll(key, &end_ptr, 0);
+    if (errno == EINVAL || errno == ERANGE || d <= 1 || end_ptr[0] != '\n')
+    {
+        printf("Invalid key\n");
+        free(key);
+        return;
+    }
+
+    errno = 0;
+    long long n = strtoll(end_ptr, NULL, 0);
+    if (errno == EINVAL || errno == ERANGE || n <= d || n < 10)
+    {
+        printf("Invalid key\n");
+        free(key);
+        return;
+    }
+    free(key);
+
+    size_t len;
+    char *input = read_file(input_file, &len);
+    size_t block_size = get_block_size(n);
+    if ((len * 8) % (block_size + 1))
+    {
+        printf("Invalid input length\n");
+        free(input);
+        return;
+    }
+    size_t num_blocks = len * 8 / (block_size + 1);
+    char *decrypt = xmalloc((block_size * num_blocks) / 8 * sizeof(char));
+    for (size_t block = 0; block < num_blocks; block++)
+    {
+        long long num = 0;
+        for (size_t i = 0; i <= block_size; i++)
+        {
+            if (get_bit(input, block * (block_size + 1) + i))
+                num += (1 << (block_size - i));
+        }
+        num = mod_power(num, d, n);
+        for (size_t i = 0; i < block_size; i++)
+            set_bit(decrypt, block * block_size + i, num & (1LL << (block_size - i - 1)));
+    }
+    free(input);
+
+    // Varify padding
+    if (decrypt[0] || decrypt[1] != 0x2)
+    {
+        printf("Invalid input\n");
+        free(decrypt);
+        return;
+    }
+
+    // find start of content
+    size_t padding_size = strlen(&decrypt[1]) + 2; // add two for starting and ending '\0'
+
+    // write to output
+    FILE *output = xfopen(output_file, "w+");
+    fwrite(&decrypt[padding_size], sizeof(char), ((block_size * num_blocks) / 8) - padding_size, output);
+    fclose(output);
+    free(decrypt);
 }

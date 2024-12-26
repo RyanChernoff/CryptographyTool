@@ -1,24 +1,24 @@
 #include <string.h>
 #include "safety.h"
 
-char *read_file(const char *file_name)
+char *read_file(const char *file_name, size_t *len_loc)
 {
     FILE *file = xfopen(file_name, "r");
 
     char *str = xmalloc(sizeof(char));
     char buffer[1024];
     size_t len = 0;
-    size_t size = fread(buffer, 1, 1023, file);
+    size_t size = fread(buffer, sizeof(char), 1024, file);
 
     *str = '\0';
 
     while (size)
     {
+        str = xrealloc(str, len + size + 1);
+        memcpy(&str[len], buffer, size);
         len += size;
-        buffer[size] = '\0';
-        str = xrealloc(str, len + 2);
-        strcat(str, buffer);
-        size = fread(buffer, 1, 1023, file);
+        str[len] = '\0';
+        size = fread(buffer, sizeof(char), 1024, file);
     }
     fclose(file);
 
@@ -33,5 +33,7 @@ char *read_file(const char *file_name)
         exit(1);
     }
 
+    if (len_loc)
+        *len_loc = len;
     return str;
 }

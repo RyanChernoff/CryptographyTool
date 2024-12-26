@@ -47,7 +47,8 @@ static long get_index(char *str, char c, size_t len)
 
 void caesar_cypher_encrypt(const char *input_file, const char *output_file, const char *key_file)
 {
-    char *input = read_file(input_file);
+    size_t len;
+    char *input = read_file(input_file, &len);
     char *map = xcalloc(28, sizeof(char));
 
     while (true)
@@ -59,7 +60,6 @@ void caesar_cypher_encrypt(const char *input_file, const char *output_file, cons
         printf("Invalid Input.\n");
     }
 
-    size_t len = strlen(input);
     for (size_t i = 0; i < len; i++)
     {
         if (input[i] >= 'a' && input[i] <= 'z')
@@ -87,16 +87,16 @@ void caesar_cypher_encrypt(const char *input_file, const char *output_file, cons
 
 void caesar_cypher_decrypt(const char *input_file, const char *output_file, const char *key_file)
 {
-    char *map = read_file(key_file);
-    if (strlen(map) != 26 || !is_alphabet(map))
+    size_t len;
+    char *map = read_file(key_file, &len);
+    if (len != 26 || !is_alphabet(map))
     {
         printf("Invalid Key\n");
         free(map);
         return;
     }
 
-    char *cypher = read_file(input_file);
-    size_t len = strlen(cypher);
+    char *cypher = read_file(input_file, &len);
     for (size_t i = 0; i < len; i++)
     {
         if (cypher[i] >= 'a' && cypher[i] <= 'z')

@@ -97,8 +97,9 @@ static void change_base_encrypt(const char *input_file, const char *output_file,
 //@requires size > 0;
 {
     // Gets input to length divisible by size
-    char *input = read_file(input_file);
-    unsigned long len = strlen(input) * 8;
+    size_t len;
+    char *input = read_file(input_file, &len);
+    len *= 8;
     while (len % size != 0)
     {
         len++;
@@ -154,8 +155,8 @@ void octal_encrypt(const char *input_file, const char *output_file, const char *
 {
     dict_t map = make_dict("01234567", false, '=');
 
-    char *input = read_file(input_file);
-    unsigned long len = strlen(input);
+    size_t len;
+    char *input = read_file(input_file, &len);
 
     char *oct = xmalloc(len * 4 * sizeof(char));
     for (unsigned long i = 0; i < len; i++)
@@ -282,8 +283,8 @@ void base_encrypt(const char *input_file, const char *output_file, const char *k
 static void change_base_decrypt(const char *input_file, const char *output_file, size_t size, dict_t map)
 //@requires size > 0;
 {
-    char *input = read_file(input_file);
-    unsigned long len = strlen(input);
+    size_t len;
+    char *input = read_file(input_file, &len);
     if (len * size % 8 != 0)
     {
         free(input);
@@ -327,8 +328,8 @@ void binary_decrypt(const char *input_file, const char *output_file)
 
 void octal_decrypt(const char *input_file, const char *output_file)
 {
-    char *input = read_file(input_file);
-    unsigned long len = strlen(input);
+    size_t len;
+    char *input = read_file(input_file, &len);
     if (len % 4 != 3)
     {
         free(input);
@@ -409,7 +410,8 @@ void base64_decrypt(const char *input_file, const char *output_file)
 
 void base_decrypt(const char *input_file, const char *output_file, const char *key_file)
 {
-    char *key = read_file(key_file);
+    size_t key_len;
+    char *key = read_file(key_file, &key_len);
     if (key[0] < '1' || key[0] > '8')
     {
         printf("Invalid key\n");
@@ -419,7 +421,7 @@ void base_decrypt(const char *input_file, const char *output_file, const char *k
 
     size_t size = key[0] - '0';
     unsigned int len = ((unsigned int)0x0001) << size;
-    if (strlen(key) != len + 2)
+    if (key_len != len + 2)
     {
         printf("Invalid key\n");
         free(key);

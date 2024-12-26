@@ -2,7 +2,8 @@
 
 void shift_cypher_encrypt(const char *input_file, const char *output_file, const char *key_file)
 {
-    char *input = read_file(input_file);
+    size_t len;
+    char *input = read_file(input_file, &len);
     char choice[5];
     int shift = 0;
 
@@ -20,7 +21,6 @@ void shift_cypher_encrypt(const char *input_file, const char *output_file, const
         }
     }
 
-    size_t len = strlen(input);
     for (size_t i = 0; i < len; i++)
     {
         char c = input[i];
@@ -47,8 +47,9 @@ void shift_cypher_encrypt(const char *input_file, const char *output_file, const
 
 void shift_cypher_decrypt(const char *input_file, const char *output_file, const char *key_file)
 {
-    char *input = read_file(input_file);
-    char *key = read_file(key_file);
+    size_t len;
+    char *input = read_file(input_file, &len);
+    char *key = read_file(key_file, NULL);
 
     int shift = 26 - atoi(key);
     free(key);
@@ -59,7 +60,6 @@ void shift_cypher_decrypt(const char *input_file, const char *output_file, const
         return;
     }
 
-    size_t len = strlen(input);
     for (size_t i = 0; i < len; i++)
     {
         char c = input[i];

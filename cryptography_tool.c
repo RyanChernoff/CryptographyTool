@@ -10,6 +10,14 @@ const char *usage_msg = "Usage: ctool [options]\n\n-e tells the program you want
 
 void create_key(const char *output, const char *key)
 {
+    if (output == NULL)
+    {
+        output = "public-key.txt";
+    }
+    if (key == NULL)
+    {
+        key = "key.txt";
+    }
     while (true)
     {
         char choice[4];
@@ -63,12 +71,18 @@ void encrypt(const char *input_file, const char *output_file, const char *key_fi
             base_encrypt(input_file, output_file, key_file);
             return;
         case '9':
+            if (key_file == NULL)
+            {
+                printf("Can't run rsa encryption without a key\n");
+                break;
+            }
             rsa_encrypt(input_file, output_file, key_file);
             return;
         case 'Q':
             return;
+        default:
+            printf("Invalid choice\n");
         }
-        printf("Invalid choice\n");
     }
 }
 
@@ -78,10 +92,14 @@ void encrypt(const char *input_file, const char *output_file, const char *key_fi
 
 void decrypt(const char *input_file, const char *output_file, const char *key_file)
 {
+    if (key_file == NULL)
+    {
+        key_file = "key.txt";
+    }
     while (true)
     {
         char choice[4];
-        printf("What decryption algorithm would you like to use:\n1 - Shift Cypher\n2 - Ceaser Cypher\n3 - From Binary\n4 - From Octal\n5 - From Hex\n6 - From Base32\n7 - From Base64\n8 - From Base\nQ - Quit\n");
+        printf("What decryption algorithm would you like to use:\n1 - Shift Cypher\n2 - Ceaser Cypher\n3 - From Binary\n4 - From Octal\n5 - From Hex\n6 - From Base32\n7 - From Base64\n8 - From Base\n9 - RSA\nQ - Quit\n");
         xfgets(choice, 4, stdin);
         switch (choice[0])
         {
@@ -124,10 +142,19 @@ void decrypt(const char *input_file, const char *output_file, const char *key_fi
             }
             base_decrypt(input_file, output_file, key_file);
             return;
+        case '9':
+            if (key_file == NULL)
+            {
+                printf("Can't decrypt RSA without a key\n");
+                break;
+            }
+            rsa_decrypt(input_file, output_file, key_file);
+            return;
         case 'Q':
             return;
+        default:
+            printf("Invalid choice\n");
         }
-        printf("Invalid choice\n");
     }
 }
 
@@ -169,17 +196,8 @@ int main(int argc, char *argv[])
         }
     }
 
-    if (key == NULL)
-    {
-        key = "key.txt";
-    }
-
     if (create_flag)
     {
-        if (output == NULL)
-        {
-            output = "public-key.txt";
-        }
         create_key(output, key);
         return 0;
     }
